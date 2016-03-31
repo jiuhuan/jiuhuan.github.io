@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>关于Array操作的一些性能测试 | JiuHuan Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="前言在日常开发中，同一种结果使用js可以有多种实现方式，不同的实现方式影响着的性能上的差异。在做极致优化的过程中，某些影响性能的方法尽量避免，这里先对Array的一些操作测试。
+环境Node.js版本为node -v v5.6.0Mac air 
+为数组添加元素两个例子：12345678910111213141516171819var array1 = [];var array2 = [];con">
+<meta property="og:type" content="article">
+<meta property="og:title" content="关于Array操作的一些性能测试">
+<meta property="og:url" content="http://jiuhuan.github.io/2016/03/30/关于Array操作的一些性能测试/index.html">
+<meta property="og:site_name" content="JiuHuan Blog">
+<meta property="og:description" content="前言在日常开发中，同一种结果使用js可以有多种实现方式，不同的实现方式影响着的性能上的差异。在做极致优化的过程中，某些影响性能的方法尽量避免，这里先对Array的一些操作测试。
+环境Node.js版本为node -v v5.6.0Mac air 
+为数组添加元素两个例子：12345678910111213141516171819var array1 = [];var array2 = [];con">
+<meta property="og:updated_time" content="2016-03-30T04:27:21.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="关于Array操作的一些性能测试">
+<meta name="twitter:description" content="前言在日常开发中，同一种结果使用js可以有多种实现方式，不同的实现方式影响着的性能上的差异。在做极致优化的过程中，某些影响性能的方法尽量避免，这里先对Array的一些操作测试。
+环境Node.js版本为node -v v5.6.0Mac air 
+为数组添加元素两个例子：12345678910111213141516171819var array1 = [];var array2 = [];con">
+  
+    <link rel="alternate" href="/atom.xml" title="JiuHuan Blog" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <!-- <div id="banner"></div> -->
+  <div id="header-outer" class="outer">
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">首页</a>
+        
+          <a class="main-nav-link" href="/archives">文章</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="搜索"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://jiuhuan.github.io"></form>
+      </div>
+    </div>
+  </div>
+  <div id="header-title" class="inner">
+    <h1 id="logo-wrap">
+      <span class="avatar"></span>
+      <a href="/" id="logo">JiuHuan Blog</a>
+    </h1>
+    <div class="info">如果你需要有人来帮助你建立一个不错的互联网产品，我可以将你的设计转化为运行快、反应灵敏、可访问的网站和应用程序。</div>
+    
+  </div>
+  
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-关于Array操作的一些性能测试" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      关于Array操作的一些性能测试
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-meta">
+      <a href="/2016/03/30/关于Array操作的一些性能测试/" class="article-date">
+  <time datetime="2016-03-30T03:26:21.000Z" itemprop="datePublished">2016-03-30</time>
+</a>
+      
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/javascript/">javascript</a>
+  </div>
+
+    </div>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>在日常开发中，同一种结果使用js可以有多种实现方式，不同的实现方式影响着的性能上的差异。在做极致优化的过程中，某些影响性能的方法尽量避免，这里先对Array的一些操作测试。</p>
+<h2 id="环境"><a href="#环境" class="headerlink" title="环境"></a>环境</h2><p>Node.js版本为<code>node -v v5.6.0</code><br>Mac air </p>
+<h2 id="为数组添加元素"><a href="#为数组添加元素" class="headerlink" title="为数组添加元素"></a>为数组添加元素</h2><p>两个例子：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> array1 = [];</span><br><span class="line"><span class="keyword">var</span> array2 = [];</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.time(<span class="string">'array push'</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; <span class="number">1000000</span>; i++) &#123;</span><br><span class="line">  array1.push(<span class="string">'a'</span>+i);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.timeEnd(<span class="string">'array push'</span>);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.time(<span class="string">'array push2'</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; <span class="number">1000000</span>; i++) &#123;</span><br><span class="line">  array2[i] = <span class="string">'a'</span>+i;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.timeEnd(<span class="string">'array push2'</span>);</span><br></pre></td></tr></table></figure></p>
+<p>结果：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">array push: 352.841ms</span><br><span class="line">array push2: 258.473ms</span><br></pre></td></tr></table></figure></p>
+<a id="more"></a>
+<h2 id="为合并两个数组"><a href="#为合并两个数组" class="headerlink" title="为合并两个数组"></a>为合并两个数组</h2><p>例1：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">console</span>.time(<span class="string">'array concat'</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> array1 = array1.concat(array2);</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.timeEnd(<span class="string">'array concat'</span>);</span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">'length:'</span> + array1.length);</span><br></pre></td></tr></table></figure></p>
+<p>结果：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">array concat: 28.534ms</span><br><span class="line">length:2000000</span><br></pre></td></tr></table></figure></p>
+<p>例2：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">console</span>.time(<span class="string">'array concat2'</span>);</span><br><span class="line"></span><br><span class="line">array2.forEach(<span class="function"><span class="keyword">function</span>(<span class="params">v</span>)</span>&#123;</span><br><span class="line">  array1.push(v);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.timeEnd(<span class="string">'array concat2'</span>);</span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">'length:'</span> + array1.length);</span><br></pre></td></tr></table></figure></p>
+<p>结果：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">array concat2: 117.288ms</span><br><span class="line">length:2000000</span><br></pre></td></tr></table></figure></p>
+<p>例3：<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">console</span>.time(<span class="string">'array concat3'</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; array2.length; i++) &#123;</span><br><span class="line">  array1.push(array2[i]);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.timeEnd(<span class="string">'array concat3'</span>);</span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">'length:'</span> + array1.length);</span><br></pre></td></tr></table></figure></p>
+<p>结果：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">array concat2: 61.036ms</span><br><span class="line">length:2000000</span><br></pre></td></tr></table></figure></p>
+<h2 id="未完待续。。。"><a href="#未完待续。。。" class="headerlink" title="未完待续。。。"></a>未完待续。。。</h2>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://jiuhuan.github.io/2016/03/30/关于Array操作的一些性能测试/" data-id="cimgg8yuk0004zyxyq961db8x" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Node-js/">Node.js</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/javascript/">javascript</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2016/03/31/使用nodemailer模块简单的实现邮件发送/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          使用nodemailer模块简单的实现邮件发送
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2016/03/30/配置达到600K持久连接的Node.js/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">配置达到600K持久连接的Node.js</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/javascript/">javascript</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/事迹/">事迹</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/ES7/">ES7</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Node-js/">Node.js</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/javascript/">javascript</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/上海/">上海</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/云栖大会/">云栖大会</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/ES7/" style="font-size: 10px;">ES7</a> <a href="/tags/Node-js/" style="font-size: 20px;">Node.js</a> <a href="/tags/javascript/" style="font-size: 20px;">javascript</a> <a href="/tags/上海/" style="font-size: 10px;">上海</a> <a href="/tags/云栖大会/" style="font-size: 10px;">云栖大会</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2016/03/31/使用nodemailer模块简单的实现邮件发送/">使用nodemailer模块简单的实现邮件发送</a>
+          </li>
+        
+          <li>
+            <a href="/2016/03/30/关于Array操作的一些性能测试/">关于Array操作的一些性能测试</a>
+          </li>
+        
+          <li>
+            <a href="/2016/03/30/配置达到600K持久连接的Node.js/">配置达到600K持久连接的Node.js</a>
+          </li>
+        
+          <li>
+            <a href="/2016/03/22/体验异步的终极解决方案-ES7的Async-Await/">体验异步的终极解决方案-ES7的Async/Await</a>
+          </li>
+        
+          <li>
+            <a href="/2016/03/22/2016年1月20日参加上海云栖大会/">2016年1月20日参加上海云栖大会</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2016 Jiu Huan<br>
+      github: <a href="https://github.com/jiuhuan" target="_blank">https://github.com/jiuhuan</a><br>
+      E-Mail: by11880@126.com
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">首页</a>
+  
+    <a href="/archives" class="mobile-nav-link">文章</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>
